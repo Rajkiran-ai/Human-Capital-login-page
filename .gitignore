@@ -1,0 +1,14 @@
+# System files
+AppData/
+.vscode/
+__pycache__/
+*.pyc
+
+# Environment
+venv/
+env/
+.env
+
+# Local development settings
+*.log
+.DS_Store

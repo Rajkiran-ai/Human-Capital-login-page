@@ -1,11 +1,11 @@
 import streamlit as st
 
-class LoginPage:
+class loginpage:
     def __init__(self):
         self.render()
 
     def render(self):
-        st.title("SeekBytes")
+        st.title("Human Resource Management")
         with st.form(key='login_form', clear_on_submit=True):
             st.markdown("<h3 style='text-align: center;'>Please Log In</h3>", unsafe_allow_html=True)
 

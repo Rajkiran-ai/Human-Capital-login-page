@@ -1,15 +1,15 @@
 import streamlit as st
-from login import LoginPage
+from login import loginpage
 from dashboard import Dashboard
 
-st.set_page_config(page_title="Human Resocia Management", layout="centered")
+st.set_page_config(page_title="Human Resource Management", layout="centered")
 
 # Custom styles
 st.markdown("""
     <style>
     body {
-        background-color: #001f3f;
-        color: white;
+        background-color: white;
+        color: #333;
     }
 
     .stForm.st-emotion-cache-qcpnpn.e1ttwmlf1 {
@@ -61,4 +61,4 @@ if "logged_in" not in st.session_state:
 if st.session_state.logged_in:
     Dashboard()
 else:
-    LoginPage()
+    loginpage()
