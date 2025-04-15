@@ -6,9 +6,31 @@ import io
 import PyPDF2
 from docx import Document
 import re
+import json
+import csv
+from openpyxl import Workbook
 
 
 class Dashboard:
+    def __init__(self):
+        # Set up language selector in sidebar
+        self.languages = {
+            'English': 'eng',
+            'Spanish': 'spa',
+            'French': 'fra',
+            'German': 'deu',
+            'Chinese': 'chi_sim'
+        }
+        # Create a container for the language selector in the top right
+        with st.container():
+            col1, col2, col3 = st.columns([6, 2, 2])
+            with col3:
+                self.selected_lang = st.selectbox(
+                    'Select Language',
+                    list(self.languages.keys()),
+                    index=0
+                )
+
     def extract_text_from_pdf(self, file):
         pdf_reader = PyPDF2.PdfReader(file)
         text = ''
@@ -23,7 +45,7 @@ class Dashboard:
 
     def extract_text_from_image(self, file):
         image = Image.open(file)
-        text = pytesseract.image_to_string(image)
+        text = pytesseract.image_to_string(image, lang=self.languages[self.selected_lang])
         return text
 
     def parse_resume_text(self, text):
@@ -77,6 +99,65 @@ class Dashboard:
                 data['education'].append(line.strip())
 
         return data
+
+    def download_data(self, data):
+        st.write('Download parsed data in your preferred format:')
+        col1, col2, col3, col4 = st.columns(4)
+
+        # JSON download
+        with col1:
+            json_str = json.dumps(data, default=lambda x: list(x) if isinstance(x, set) else x)
+            st.download_button(
+                label='JSON',
+                data=json_str,
+                file_name='resume_data.json',
+                mime='application/json'
+            )
+
+        # CSV download
+        with col2:
+            csv_data = io.StringIO()
+            writer = csv.writer(csv_data)
+            writer.writerow(['Field', 'Value'])
+            for key, value in data.items():
+                if isinstance(value, (list, set)):
+                    value = ', '.join(str(v) for v in value)
+                writer.writerow([key, value])
+            st.download_button(
+                label='CSV',
+                data=csv_data.getvalue(),
+                file_name='resume_data.csv',
+                mime='text/csv'
+            )
+
+        # Excel download
+        with col3:
+            wb = Workbook()
+            ws = wb.active
+            ws.append(['Field', 'Value'])
+            for key, value in data.items():
+                if isinstance(value, (list, set)):
+                    value = ', '.join(str(v) for v in value)
+                ws.append([key, value])
+            excel_data = io.BytesIO()
+            wb.save(excel_data)
+            excel_data.seek(0)
+            st.download_button(
+                label='Excel',
+                data=excel_data,
+                file_name='resume_data.xlsx',
+                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+
+        # TXT download
+        with col4:
+            txt_content = '\n'.join([f'{key}: {value}' for key, value in data.items()])
+            st.download_button(
+                label='TXT',
+                data=txt_content,
+                file_name='resume_data.txt',
+                mime='text/plain'
+            )
 
     def __init__(self):
         self.render()
